@@ -20,6 +20,21 @@ service CoreService {
      * need to be increased to prevent timeouts.
      */
     rpc SetMavlinkTimeout(SetMavlinkTimeoutRequest) returns(SetMavlinkTimeoutResponse) {}
+    /*
+     * Feed the heartbeat watchdog.
+     *
+     * MAVSDK can be configured with a heartbeat watchdog (deadman timer).
+     * While configured, the periodic heartbeats sent by MAVSDK are only sent
+     * as long as this is called at least once per timeout period. If the
+     * watchdog times out, heartbeats stop until it is fed again.
+     *
+     * This allows MAVSDK's heartbeats to reflect the liveness of the client:
+     * if the client hangs or dies, heartbeats stop.
+     *
+     * Has no effect if no watchdog is configured (e.g. with the
+     * --heartbeat-watchdog-timeout option of mavsdk_server).
+     */
+    rpc FeedHeartbeatWatchdog(FeedHeartbeatWatchdogRequest) returns(FeedHeartbeatWatchdogResponse) {}
 }
 
 message SubscribeConnectionStateRequest {}
@@ -31,6 +46,9 @@ message SetMavlinkTimeoutRequest {
     double timeout_s = 1; // Timeout in seconds
 }
 message SetMavlinkTimeoutResponse {}
+
+message FeedHeartbeatWatchdogRequest {}
+message FeedHeartbeatWatchdogResponse {}
 
 // Connection state type.
 message ConnectionState {
