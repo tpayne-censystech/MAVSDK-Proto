@@ -32,9 +32,27 @@ service CoreService {
      * if the client hangs or dies, heartbeats stop.
      *
      * Has no effect if no watchdog is configured (e.g. with the
-     * --heartbeat-watchdog-timeout option of mavsdk_server).
+     * --heartbeat-watchdog-timeout option of mavsdk_server, or
+     * SetHeartbeatWatchdogTimeout).
      */
     rpc FeedHeartbeatWatchdog(FeedHeartbeatWatchdogRequest) returns(FeedHeartbeatWatchdogResponse) {}
+    /*
+     * Set the heartbeat watchdog timeout.
+     *
+     * When timeout_s is greater than 0, the periodic heartbeats sent by MAVSDK
+     * are only sent as long as FeedHeartbeatWatchdog is called at least once
+     * per timeout period. If the watchdog times out, heartbeats stop until it
+     * is fed again.
+     *
+     * When timeout_s is 0, the watchdog is disabled and heartbeats follow the
+     * usual policy (always_send_heartbeats or a connected system).
+     *
+     * Values greater than 0 and less than 1 are rejected.
+     *
+     * This is an alternative to configuring the watchdog at mavsdk_server
+     * startup with the --heartbeat-watchdog-timeout option.
+     */
+    rpc SetHeartbeatWatchdogTimeout(SetHeartbeatWatchdogTimeoutRequest) returns(SetHeartbeatWatchdogTimeoutResponse) {}
 }
 
 message SubscribeConnectionStateRequest {}
@@ -49,6 +67,11 @@ message SetMavlinkTimeoutResponse {}
 
 message FeedHeartbeatWatchdogRequest {}
 message FeedHeartbeatWatchdogResponse {}
+
+message SetHeartbeatWatchdogTimeoutRequest {
+    double timeout_s = 1; // Timeout in seconds. 0 disables the watchdog. Minimum 1 when enabled.
+}
+message SetHeartbeatWatchdogTimeoutResponse {}
 
 // Connection state type.
 message ConnectionState {
